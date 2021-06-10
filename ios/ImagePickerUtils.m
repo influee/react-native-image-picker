@@ -33,6 +33,7 @@
         }
     } else {
         picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+        picker.videoExportPreset = AVAssetExportPresetHighestQuality;
     }
 
     if ([options[@"mediaType"] isEqualToString:@"video"]) {
@@ -44,22 +45,6 @@
     }
 
     picker.modalPresentationStyle = UIModalPresentationCurrentContext;
-}
-
-+ (PHPickerConfiguration *)makeConfigurationFromOptions:(NSDictionary *)options target:(RNImagePickerTarget)target API_AVAILABLE(ios(14))
-{
-    PHPickerConfiguration *configuration = [[PHPickerConfiguration alloc] init];
-    configuration.preferredAssetRepresentationMode = PHPickerConfigurationAssetRepresentationModeCurrent;
-
-    if ([options[@"mediaType"] isEqualToString:@"video"]) {
-        configuration.filter = [PHPickerFilter videosFilter];
-    } else if ([options[@"mediaType"] isEqualToString:@"photo"]) {
-        configuration.filter = [PHPickerFilter imagesFilter];
-    } else if ((target == library) && ([options[@"mediaType"] isEqualToString:@"mixed"])) {
-        configuration.filter = [PHPickerFilter anyFilterMatchingSubfilters: @[PHPickerFilter.imagesFilter, PHPickerFilter.videosFilter]];
-    }
-
-    return configuration;
 }
 
 + (BOOL) isSimulator

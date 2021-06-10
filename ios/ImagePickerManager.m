@@ -50,17 +50,6 @@ RCT_EXPORT_METHOD(launchImageLibrary:(NSDictionary *)options callback:(RCTRespon
     
     self.options = options;
 
-    if (@available(iOS 14, *)) {
-        if (target == library) {
-            PHPickerConfiguration *configuration = [ImagePickerUtils makeConfigurationFromOptions:options target:target];
-            PHPickerViewController *picker = [[PHPickerViewController alloc] initWithConfiguration:configuration];
-            picker.delegate = self;
-
-            [self showPickerViewController:picker];
-            return;
-        }
-    }
-
     UIImagePickerController *picker = [[UIImagePickerController alloc] init];
     [ImagePickerUtils setupPickerFromOptions:picker options:self.options target:target];
     picker.delegate = self;
@@ -106,34 +95,6 @@ RCT_EXPORT_METHOD(launchImageLibrary:(NSDictionary *)options callback:(RCTRespon
             self.callback(@[@{@"didCancel": @YES}]);
         }];
     });
-}
-
-- (void)picker:(PHPickerViewController *)picker didFinishPicking:(NSArray<PHPickerResult *> *)results API_AVAILABLE(ios(14)){
-    [picker dismissViewControllerAnimated:YES completion:nil];
-
-    if (results.count == 0) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            self.callback(@[@{@"didCancel": @YES}]);
-        });
-        return;
-    }
-
-    for (PHPickerResult *result in results) {
-        NSItemProvider *provider = result.itemProvider;
-
-        if ([provider hasItemConformingToTypeIdentifier:(NSString *)kUTTypeImage]) {
-            [provider loadDataRepresentationForTypeIdentifier:(NSString *)kUTTypeImage
-                      completionHandler:^(NSData *data, NSError * _Nullable error) {
-                [self onImageObtained:[UIImage imageWithData:data] data:data];
-            }];
-        }
-        else if ([provider hasItemConformingToTypeIdentifier:(NSString *)kUTTypeMovie]) {
-            [provider loadFileRepresentationForTypeIdentifier:(NSString *)kUTTypeMovie
-                                            completionHandler:^(NSURL * _Nullable url, NSError * _Nullable error) {
-                [self onVideoObtained:url];
-            }];
-        }
-    }
 }
 
 - (void)onImageObtained:(UIImage*)image data:(NSData*)data
